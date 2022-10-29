@@ -14,12 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+
 @RequestMapping("books")
+@RestController
 public class BookController {
 
     private List<Book> bookList;
-    private int id;
+    private int id = 1;
 
     public List<Book> getBookList() {
         return bookList;
@@ -46,8 +47,69 @@ public class BookController {
     // pass book as request body
     @PostMapping("/create-book")
     public ResponseEntity<Book> createBook(@RequestBody Book book){
-        // Your code goes here.
+//        Book b = new Book();
+//        b.setName(book.);
+        book.setId(this.id);
+        this.id++;
+        bookList.add(book);
+        System.out.println("Post Request");
+        System.out.println(book.getName());
         return new ResponseEntity<>(book, HttpStatus.CREATED);
+    }
+    @GetMapping("/get-book-by-id/")
+    public ResponseEntity<Book> getBookById(@RequestParam ("id")Integer id){
+        //System.out.println("Get Book by id: " +id);
+        for (int i = 0; i < bookList.size(); i++){
+           // System.out.println("Current Id: " + bookList.get(i).getId());
+            if (bookList.get(i).getId() == id){
+                System.out.println("Match FOund");
+                return new ResponseEntity<Book>(bookList.get(i), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+    @DeleteMapping("/delete-book-by-id/")
+    public ResponseEntity<String> deleteBookById(@RequestParam ("id")Integer id){
+        System.out.println("Delete id:" +id);
+        for (int i = 0; i < bookList.size(); i++){
+            if (bookList.get(i).getId() == id){
+                bookList.remove(i);
+                return new ResponseEntity<>("Removed",HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>("Not Such Element",HttpStatus.OK);
+    }
+    @DeleteMapping("/delete-all-books/")
+    public ResponseEntity<String> deleteAllBooks(){
+        bookList = new ArrayList<>();
+        this.id = 1;
+        return new ResponseEntity<>("Deleted", HttpStatus.OK);
+    }
+    @GetMapping("/get-all-books/")
+    public ResponseEntity<List<Book>> getAllBooks(){
+        return new ResponseEntity<>(bookList, HttpStatus.OK);
+    }
+    @GetMapping("/get-books-by-author/")
+    public ResponseEntity<List<Book>> getBooksByAuthor(@RequestParam("author") String authorName){
+        System.out.println("Get Books By Author");
+        List<Book> ans = new ArrayList<>();
+        for (Book b: bookList){
+            if (b.getAuthor().equals(authorName)){
+                ans.add(b);
+            }
+        }
+        return new ResponseEntity<>(ans,HttpStatus.OK);
+    }
+    @GetMapping("/get-books-by-genre/")
+    public ResponseEntity<List<Book>> getBooksByGenre(@RequestParam("genre") String genre){
+        System.out.println("Get Books By genre");
+        List<Book> ans = new ArrayList<>();
+        for (Book b: bookList){
+            if (b.getGenre().equals(genre)){
+                ans.add(b);
+            }
+        }
+        return new ResponseEntity<>(ans,HttpStatus.OK);
     }
 
     // get request /get-book-by-id/{id}
